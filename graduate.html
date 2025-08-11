@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>نظام طلبات الخريجين — تقديم الطلب</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  
+  <!-- Animate CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  
+  <style>
+    :root {
+      --primary: #6a11cb;
+      --secondary: #2575fc;
+      --accent: #00d4ff;
+      --success: #2ecc71;
+      --danger: #e74c3c;
+      --warning: #f39c12;
+      --light: #f8f9fa;
+      --dark: #2c3e50;
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color: white;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* شريط التنقل */
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 20px 15px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      transform: rotate(30deg);
+    }
+
+    header img {
+      height: 70px;
+      filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+      transition: transform 0.3s ease;
+    }
+
+    header img:hover {
+      transform: scale(1.1);
+    }
+
+    header div:first-child {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    header div div:first-child {
+      font-weight: 800;
+      font-size: 1.8rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    header .small {
+      font-size: 1rem;
+      opacity: 0.9;
+      margin-top: 5px;
+    }
+
+    /* الحاوية الرئيسية */
+    .wrap {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    /* البطاقة الرئيسية */
+    .card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+      transition: all 0.5s ease;
+      transform-style: preserve-3d;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+
+    .card:hover::before {
+      transform: translateX(100%);
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    h2 {
+      margin: 0 0 20px;
+      color: white;
+      font-weight: 800;
+      font-size: 2rem;
+      text-align: center;
+      background: linear-gradient(to right, #ffffff, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .small {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    /* النموذج */
+    form .row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .col {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.1rem;
+    }
+
+    input[type='text'], 
+    input[type='tel'], 
+    input[type='number'], 
+    select {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-family: 'Cairo', sans-serif;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    input::placeholder, select {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.3);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* قسم الخدمات */
+    .services-section {
+      margin: 30px 0;
+    }
+
+    .services-section h3 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .services-list {
+      margin-top: 15px;
+    }
+
+    .service-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
+      border: 1px solid var(--glass-border);
+    }
+
+    .service-item:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateX(5px);
+    }
+
+    .service-item input[type='checkbox'] {
+      margin-left: 15px;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .service-item label {
+      margin: 0;
+      cursor: pointer;
+      font-weight: 600;
+      color: white;
+      flex: 1;
+    }
+
+    .service-item .small {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+    }
+
+    .service-details {
+      display: none;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      margin-top: 12px;
+      border: 1px solid var(--glass-border);
+    }
+
+    .service-details .row {
+      margin-bottom: 0;
+    }
+
+    .service-details .col {
+      min-width: 200px;
+    }
+
+    /* الزر */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 30px;
+      border-radius: 50px;
+      border: none;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      box-shadow: 0 5px 20px rgba(106, 17, 203, 0.4);
+      font-family: 'Cairo', sans-serif;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(106, 17, 203, 0.6);
+    }
+
+    .btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* الرسائل */
+    .info, .success {
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 20px;
+      text-align: center;
+      font-weight: 500;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .info {
+      background: rgba(52, 152, 219, 0.2);
+      border-left: 4px solid var(--accent);
+    }
+
+    .success {
+      background: rgba(46, 204, 113, 0.2);
+      border-left: 4px solid var(--success);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* المودال */
+    #modalOverlay {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      backdrop-filter: blur(5px);
+    }
+
+    #modalContent {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      padding: 40px;
+      border-radius: 20px;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      box-shadow: var(--shadow-hover);
+      color: white;
+      animation: modalEnter 0.5s ease;
+    }
+
+    @keyframes modalEnter {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    #modalTitle {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    #deliveryDetails {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    #modalCloseBtn {
+      background: linear-gradient(135deg, var(--success), #27ae60);
+      padding: 12px 25px;
+    }
+
+    /* التذييل */
+    footer {
+      text-align: center;
+      padding: 30px 0;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1.1rem;
+      margin-top: 20px;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    footer a:hover {
+      color: white;
+      text-decoration: underline;
+    }
+
+    /* تأثيرات الجوال */
+    @media (max-width: 768px) {
+      .wrap {
+        margin: 20px auto;
+        padding: 0 15px;
+      }
+      
+      .card {
+        padding: 20px;
+      }
+      
+      h2 {
+        font-size: 1.6rem;
+      }
+      
+      .row {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .col {
+        min-width: 100%;
+      }
+      
+      header img {
+        height: 60px;
+      }
+      
+      header div div:first-child {
+        font-size: 1.5rem;
+      }
+      
+      #modalContent {
+        padding: 30px 20px;
+      }
+    }
+
+    /* مؤشر التحميل */
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div>
+    <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/4/4f/Minia_University_logo.png/200px-Minia_University_logo.png" alt="شعار جامعة المنيا" />
+    <div>
+      <div>جامعة المنيا</div>
+      <div class="small">كلية الطب البيطري — نظام طلبات الخريجين</div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="sectionSubmit" class="card animate__animated animate__fadeInUp">
+    <h2><i class="fas fa-file-contract"></i> نموذج تقديم طلبات الخريجين</h2>
+    <p class="small">املأ البيانات ورفـع إيصال الدفع لكل خدمة المطلوبة</p>
+
+    <form id="requestForm">
+      <div class="row">
+        <div class="col">
+          <label for="fullName"><i class="fas fa-user"></i> الاسم الكامل</label>
+          <input id="fullName" type="text" required placeholder="أدخل الاسم الكامل" />
+        </div>
+        <div class="col">
+          <label for="nationalId"><i class="fas fa-id-card"></i> الرقم القومي</label>
+          <input id="nationalId" type="number" required placeholder="أدخل الرقم القومي" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <label for="graduationYear"><i class="fas fa-graduation-cap"></i> سنة التخرج</label>
+          <select id="graduationYear" required>
+            <option value="">اختر سنة التخرج</option>
+          </select>
+        </div>
+        <div class="col">
+          <label for="phoneNumber"><i class="fas fa-phone"></i> رقم الهاتف</label>
+          <input id="phoneNumber" type="tel" required placeholder="مثال: 010xxxxxxxx" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <label for="whatsapp"><i class="fab fa-whatsapp"></i> واتساب (اختياري)</label>
+          <input id="whatsapp" type="tel" placeholder="مثال: 010xxxxxxxx" />
+        </div>
+        <div class="col">
+          <label for="email"><i class="fas fa-envelope"></i> البريد الإلكتروني (اختياري)</label>
+          <input id="email" type="text" placeholder="example@email.com" />
+        </div>
+      </div>
+
+      <div class="services-section">
+        <h3><i class="fas fa-list"></i> الخدمات المتاحة</h3>
+        <div id="servicesContainer" class="services-list">
+          <div class="service-item" style="justify-content: center;">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span style="margin-right: 10px;">جارٍ تحميل الخدمات...</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 30px">
+        <button class="btn" id="submitBtn" type="submit">
+          <i class="fas fa-paper-plane"></i> إرسال الطلب
+        </button>
+      </div>
+
+      <div id="formMessage" class="info" style="display: none"></div>
+    </form>
+  </section>
+</main>
+
+<!-- مودال ميعاد التسليم -->
+<div id="modalOverlay">
+  <div id="modalContent" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
+    <h3 id="modalTitle"><i class="fas fa-check-circle"></i> تم إرسال الطلب بنجاح</h3>
+    <p id="deliveryDetails">جارٍ تحميل ميعاد التسليم...</p>
+    <button id="modalCloseBtn" class="btn">
+      <i class="fas fa-times"></i> إغلاق
+    </button>
+  </div>
+</div>
+
+<footer>
+  <div>تصميم وتطوير: <a href="mailto:bolesgaras200000@gmail.com">المهندس بولس سمير</a></div>
+  <div style="margin-top: 10px; font-size: 0.9rem;">
+    <i class="fas fa-phone-alt"></i> <a href="tel:01093939137">01093939137</a>
+  </div>
+</footer>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+  import { getDatabase, ref, get, push, set } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+  const firebaseConfig = {
+    apiKey: 'AIzaSyBtLojF4wpmpDua3UZa_GzlaXhTxM2ediI',
+    authDomain: 'gradu-ae76f.firebaseapp.com',
+    databaseURL: 'https://gradu-ae76f-default-rtdb.firebaseio.com',
+    projectId: 'gradu-ae76f',
+    storageBucket: 'gradu-ae76f.appspot.com',
+    messagingSenderId: '564230686481',
+    appId: '1:564230686481:web:4f219e913ee1185ba32eb0',
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // عناصر DOM
+  const graduationYearSelect = document.getElementById('graduationYear');
+  const servicesContainer = document.getElementById('servicesContainer');
+  const requestForm = document.getElementById('requestForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const formMessage = document.getElementById('formMessage');
+
+  const modalOverlay = document.getElementById('modalOverlay');
+  const deliveryDetails = document.getElementById('deliveryDetails');
+  const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+  // تهيئة السنوات
+  (function fillYears() {
+    const cur = new Date().getFullYear();
+    for (let y = cur; y >= 2010; y--) {
+      const opt = document.createElement('option');
+      opt.value = y;
+      opt.textContent = y;
+      graduationYearSelect.appendChild(opt);
+    }
+  })();
+
+  // تحميل قائمة الخدمات من Firebase وتوليد واجهة الخدمات
+  async function loadServices() {
+    try {
+      const snap = await get(ref(db, 'services'));
+      servicesContainer.innerHTML = '';
+      if (snap.exists()) {
+        const services = snap.val();
+        let any = false;
+        for (const key in services) {
+          const s = services[key];
+          if (s.active) {
+            any = true;
+            const item = document.createElement('div');
+            item.className = 'service-item animate__animated animate__fadeIn';
+            item.innerHTML = `
+              <div style="display:flex;align-items:center">
+                <input type="checkbox" id="svc_${key}" class="svcCheck">
+                <label for="svc_${key}" style="margin-left:12px">
+                  ${s.name} ${s.price ? '<span style="color:var(--accent)">- ' + s.price + ' ج.م</span>' : ''}
+                </label>
+              </div>
+              <div class="small">${s.note || ''}</div>
+            `;
+
+            const details = document.createElement('div');
+            details.className = 'service-details';
+            details.id = `details_${key}`;
+            details.innerHTML = `
+              <div class="row">
+                <div class="col">
+                  <label><i class="fas fa-sort-numeric-up"></i> الكمية</label>
+                  <input type="number" class="qty" value="${s.quantity || 1}" min="1" style="padding:12px">
+                </div>
+                <div class="col">
+                  <label><i class="fas fa-receipt"></i> إيصال الدفع</label>
+                  <input type="file" class="receipt" accept="image/*" style="padding:8px" required>
+                </div>
+              </div>
+            `;
+
+            const chk = item.querySelector('.svcCheck');
+            chk.addEventListener('change', (e) => {
+              details.style.display = e.target.checked ? 'block' : 'none';
+              const r = details.querySelector('.receipt');
+              if (r) r.required = e.target.checked;
+            });
+
+            servicesContainer.appendChild(item);
+            servicesContainer.appendChild(details);
+          }
+        }
+        if (!any) {
+          servicesContainer.innerHTML = '<div class="service-item" style="justify-content:center;color:rgba(255,255,255,0.7)">لا توجد خدمات متاحة حالياً.</div>';
+        }
+      } else {
+        servicesContainer.innerHTML = '<div class="service-item" style="justify-content:center;color:rgba(255,255,255,0.7)">لا توجد خدمات مسجلة في النظام.</div>';
+      }
+    } catch (err) {
+      console.error(err);
+      servicesContainer.innerHTML = '<div class="service-item" style="justify-content:center;color:var(--danger)">خطأ في تحميل الخدمات.</div>';
+    }
+  }
+
+  // جلب إعدادات (تاريخ ثابت، وقت ثابت، أو عدد أيام) من Firebase
+  async function getDeliverySettings() {
+    try {
+      const pickupSnap = await get(ref(db, 'settings/pickupDetails'));
+      const daysSnap = await get(ref(db, 'settings/deliveryDays'));
+      const pickup = pickupSnap.exists() ? pickupSnap.val() : null;
+      const days = daysSnap.exists() ? Number(daysSnap.val()) : null;
+      return { pickup, days };
+    } catch (e) {
+      console.error('خطأ في جلب إعدادات التسليم', e);
+      return { pickup: null, days: null };
+    }
+  }
+
+  // حساب وارجاع نص ميعاد التسليم (بالعربية، مع يوم الأسبوع)
+  function formatDeliveryTextFromDays(days) {
+    const deliveryDate = new Date();
+    deliveryDate.setDate(deliveryDate.getDate() + (days || 15));
+    const parts = deliveryDate.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    return `موعد الاستلام المتوقع: ${parts}`;
+  }
+
+  function formatDeliveryTextFromFixed(pickup) {
+    try {
+      const dateParts = pickup.date.split('-').map(Number);
+      const dt = new Date(dateParts[0], dateParts[1]-1, dateParts[2]);
+      const dayName = dt.toLocaleDateString('ar-EG', { weekday: 'long' });
+      return `موعد الاستلام: ${dayName}، ${dt.toLocaleDateString('ar-EG', { year:'numeric', month:'long', day:'numeric' })} - الساعة ${pickup.time}`;
+    } catch (e) {
+      return 'موعد الاستلام ثابت (بيانات غير صالحة).';
+    }
+  }
+
+  function openModal(msg) {
+    deliveryDetails.textContent = msg;
+    modalOverlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  modalCloseBtn.addEventListener('click', () => {
+    modalOverlay.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  });
+
+  // رفع ملف إلى Cloudinary (الرابط الصحيح)
+  async function uploadToCloudinary(file) {
+    const CLOUDINARY_CLOUD_NAME = 'dk0abpjlw';
+    const CLOUDINARY_UPLOAD_PRESET = 'ml_default';
+    const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+    const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: fd });
+    if (!res.ok) throw new Error('فشل رفع الملف');
+    const data = await res.json();
+    return data.secure_url;
+  }
+
+  // إرسال الطلب
+  requestForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<span class="spinner"></span> جارٍ الإرسال...';
+    formMessage.style.display = 'none';
+
+    try {
+      const checked = document.querySelectorAll('.svcCheck:checked');
+      if (checked.length === 0) {
+        formMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> اختر خدمة واحدة على الأقل';
+        formMessage.className = 'info';
+        formMessage.style.display = 'block';
+        throw new Error('no service');
+      }
+
+      const servicesArr = [];
+      let uploadError = false;
+
+      for (const cb of checked) {
+        const id = cb.id.split('_')[1];
+        const det = document.getElementById('details_' + id);
+        const qty = det.querySelector('.qty').value;
+        const file = det.querySelector('.receipt').files[0];
+        
+        if (!file) {
+          formMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> الرجاء رفع إيصال الدفع لكل خدمة محددة';
+          formMessage.className = 'info';
+          formMessage.style.display = 'block';
+          uploadError = true;
+          break;
+        }
+
+        try {
+          // رفع الملف على Cloudinary
+          const url = await uploadToCloudinary(file);
+          servicesArr.push({ 
+            id, 
+            name: cb.nextElementSibling ? cb.nextElementSibling.textContent.trim().split(' - ')[0] : 'خدمة', 
+            quantity: Number(qty), 
+            receiptUrl: url 
+          });
+        } catch (uploadErr) {
+          console.error('خطأ في رفع الملف:', uploadErr);
+          formMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> حدث خطأ أثناء رفع ملف الإيصال. حاول مرة أخرى.';
+          formMessage.className = 'info';
+          formMessage.style.display = 'block';
+          uploadError = true;
+          break;
+        }
+      }
+
+      if (uploadError) {
+        throw new Error('upload error');
+      }
+
+      const newRef = push(ref(db, 'requests'));
+      const payload = {
+        id: newRef.key,
+        name: document.getElementById('fullName').value.trim(),
+        nationalId: String(document.getElementById('nationalId').value).trim(),
+        graduationYear: document.getElementById('graduationYear').value,
+        phone: document.getElementById('phoneNumber').value.trim(),
+        whatsapp: document.getElementById('whatsapp').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        services: servicesArr,
+        timestamp: Date.now(),
+        status: 'pending',
+      };
+
+      await set(newRef, payload);
+      
+      // إعادة تعيين النموذج
+      requestForm.reset();
+      document.querySelectorAll('.service-details').forEach((d) => (d.style.display = 'none'));
+      document.querySelectorAll('.svcCheck').forEach((chk) => {
+        chk.checked = false;
+      });
+
+      // جلب الإعدادات لعرض الميعاد للطالب
+      const settings = await getDeliverySettings();
+      let msg = '';
+      if (settings.pickup && settings.pickup.date && settings.pickup.time) {
+        msg = formatDeliveryTextFromFixed(settings.pickup);
+      } else if (settings.days) {
+        msg = formatDeliveryTextFromDays(settings.days);
+      } else {
+        msg = formatDeliveryTextFromDays(15); // افتراضي
+      }
+      
+      openModal(msg);
+      
+    } catch (err) {
+      console.error(err);
+      if (err.message !== 'no service' && err.message !== 'upload error' && err.message !== 'missing receipt') {
+        formMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> حدث خطأ أثناء الإرسال. حاول مرة أخرى.';
+        formMessage.className = 'info';
+        formMessage.style.display = 'block';
+      }
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+    }
+  });
+
+  // بدء التشغيل
+  (function init() {
+    loadServices();
+  })();
+</script>
+</body>
+</html>
