@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - الطلبات الحالية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+        body { font-family: 'Tajawal', sans-serif; margin: 0; padding: 0; background-color: #f5f7fa; }
+        .header { background-color: var(--primary-color); color: white; padding: 15px 0; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header h1 { margin: 0; font-size: 24px; }
+        .nav { background-color: var(--dark-color); padding: 10px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .nav a { color: white; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s; }
+        .nav a:hover, .nav a.active { background-color: var(--secondary-color); }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+        .card { background-color: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05); padding: 20px; margin-bottom: 20px; }
+        .card-title { color: var(--primary-color); margin-top: 0; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+        .filters { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-group { flex: 1; min-width: 200px; }
+        .filter-group label { display: block; margin-bottom: 8px; font-weight: bold; }
+        .filter-group select, .filter-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Tajawal', sans-serif; }
+        .btn { padding: 8px 12px; border: none; border-radius: 6px; font-family: 'Tajawal', sans-serif; font-weight: bold; cursor: pointer; transition: background-color 0.3s; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
+        .btn-primary { background-color: var(--secondary-color); color: white; }
+        .btn-success { background-color: var(--success-color); color: white; }
+        .btn-danger { background-color: var(--danger-color); color: white; }
+        .btn-info { background-color: #17a2b8; color: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #eee; }
+        th { background-color: #f8f9fa; font-weight: bold; color: var(--dark-color); }
+        tr:hover { background-color: #f8f9fa; }
+        .actions-cell { display: flex; gap: 5px; flex-wrap: wrap; }
+        .badge { display: inline-block; padding: 5px 10px; border-radius: 20px; font-size: 14px; font-weight: bold; }
+        .badge-warning { background-color: #fff3e0; color: var(--warning-color); }
+        .badge-success { background-color: #e8f5e9; color: var(--success-color); }
+        .badge-danger { background-color: #ffebee; color: var(--danger-color); }
+        .modal { display: none; position: fixed; top: 0; right: 0; bottom: 0; left: 0; background-color: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-content { background-color: white; border-radius: 8px; width: 90%; max-width: 900px; max-height: 90vh; overflow-y: auto; padding: 20px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .modal-title { margin: 0; color: var(--primary-color); }
+        .close-modal { background: none; border: none; font-size: 24px; cursor: pointer; }
+        .service-list { list-style: none; padding: 0; }
+        .service-list li { padding: 12px; border-bottom: 1px dashed #eee; display: flex; justify-content: space-between; }
+        .receipt-image { max-width: 100%; max-height: 350px; border: 1px solid #ddd; border-radius: 4px; margin-top: 10px; }
+        .receipt-thumbnail { width: 100px; height: 100px; object-fit: cover; margin: 5px; cursor: pointer; border: 1px solid #ddd; border-radius: 4px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Tajawal', sans-serif; }
+        .receipts-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .stats-modal .stat-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
+        .stats-modal .stat-value { font-weight: bold; }
+        .export-btn { margin-left: 10px; }
+        @media (max-width: 768px) { .filters { flex-direction: column; } .actions-cell { flex-direction: column; } }
+    </style>
+</head>
+<body>
+    <div class="header"><h1>لوحة تحكم طلبات الخريجين</h1></div>
+    
+    <div class="nav">
+        <a href="admin.html" class="active"><i class="fas fa-list"></i> الطلبات الحالية</a>
+        <a href="completed.html"><i class="fas fa-check-circle"></i> الطلبات المكتملة</a>
+        <a href="settings.html"><i class="fas fa-cog"></i> الإعدادات</a>
+    </div>
+    
+    <div class="container">
+        <!-- إحصائيات -->
+        <div class="stats">
+            <div class="stat-card primary" id="totalRequestsCard"><h3>إجمالي الطلبات الحالية</h3><p id="totalRequests">0</p></div>
+            <div class="stat-card warning" id="pendingRequestsCard"><h3>طلبات قيد التنفيذ</h3><p id="pendingRequests">0</p></div>
+            <div class="stat-card danger" id="cancelledRequestsCard"><h3>طلبات ملغاة</h3><p id="cancelledRequests">0</p></div>
+        </div>
+        
+        <!-- فلترة -->
+        <div class="card">
+            <h2 class="card-title">فلترة الطلبات</h2>
+            <div class="filters">
+                <div class="filter-group"><label for="filterDate">التاريخ</label><input type="date" id="filterDate"></div>
+                <div class="filter-group"><label for="filterStatus">حالة الطلب</label><select id="filterStatus"><option value="all">الكل</option><option value="pending">قيد التنفيذ</option><option value="cancelled">ملغاة</option></select></div>
+                <div class="filter-group"><label for="filterGraduationYear">سنة التخرج</label><select id="filterGraduationYear"><option value="all">الكل</option></select></div>
+                <div class="filter-group"><label for="search">بحث بالاسم أو الرقم القومي</label><input type="text" id="search" placeholder="ابحث بأول حرف أو أكثر..."></div>
+            </div>
+            <button id="applyFilters" class="btn btn-primary"><i class="fas fa-filter"></i> تطبيق الفلتر</button>
+            <button id="exportExcel" class="btn btn-success export-btn"><i class="fas fa-file-excel"></i> تصدير إلى Excel</button>
+        </div>
+        
+        <!-- جدول الطلبات -->
+        <div class="card">
+            <h2 class="card-title">قائمة الطلبات الحالية</h2>
+            <table id="requestsTable">
+                <thead>
+                    <tr><th>رقم الطلب</th><th>اسم الخريج</th><th>سنة التخرج</th><th>الخدمات</th><th>تاريخ الطلب</th><th>تاريخ التسليم</th><th>الحالة</th><th>إجراءات</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- مودال تفاصيل الطلب -->
+    <div class="modal" id="requestModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title">تفاصيل الطلب</h3><button class="close-modal">&times;</button></div>
+            <div class="form-group"><label>رقم الطلب:</label><p id="modalRequestId"></p></div>
+            <div class="form-group"><label>اسم الخريج:</label><p id="modalName"></p></div>
+            <div class="form-group"><label>الرقم القومي:</label><p id="modalNationalId"></p></div>
+            <div class="form-group"><label>سنة التخرج:</label><p id="modalGraduationYear"></p></div>
+            <div class="form-group"><label>رقم الهاتف:</label><p id="modalPhone"></p></div>
+            <div class="form-group"><label>الواتساب:</label><p id="modalWhatsapp"></p></div>
+            <div class="form-group"><label>البريد الإلكتروني:</label><p id="modalEmail"></p></div>
+            <div class="form-group"><label>الخدمات المطلوبة:</label><ul class="service-list" id="modalServices"></ul></div>
+            <div class="form-group"><label>إيصالات الدفع:</label><div class="receipts-container" id="modalReceipts"></div></div>
+            <div class="form-group"><label>حالة الطلب:</label><select id="modalStatus" class="form-control"><option value="pending">قيد التنفيذ</option><option value="cancelled">ملغاة</option></select></div>
+            <div class="form-group"><label>تاريخ التسليم:</label><p id="modalDeliveryDate"></p></div>
+            <div class="form-group"><label>ملاحظات:</label><textarea id="modalNotes" class="form-control" rows="3"></textarea></div>
+            <button id="saveRequest" class="btn btn-primary"><i class="fas fa-save"></i> حفظ التغييرات</button>
+        </div>
+    </div>
+
+    <!-- مودال عرض صورة الإيصال -->
+    <div class="modal" id="receiptModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="modal-title">صورة الإيصال</h3><button class="close-modal">&times;</button></div>
+            <img id="fullReceiptImage" class="receipt-image" src="" alt="صورة الإيصال">
+            <div style="margin-top:10px;text-align:left">
+                <a id="downloadReceiptBtn" class="btn btn-success" href="#" download><i class="fas fa-download"></i> تحميل الإيصال</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtLojF4wpmpDua3UZa_GzlaXhTxM2ediI",
+            authDomain: "gradu-ae76f.firebaseapp.com",
+            databaseURL: "https://gradu-ae76f-default-rtdb.firebaseio.com",
+            projectId: "gradu-ae76f",
+            storageBucket: "gradu-ae76f.appspot.com",
+            messagingSenderId: "564230686481",
+            appId: "1:564230686481:web:4f219e913ee1185ba32eb0"
+        };
+        
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        let allRequests = [];
+        let deliveryDays = 15; // افتراضي إلى أن يحمّل من الإعدادات
+        
+        // عناصر DOM
+        const requestsTableBody = document.querySelector('#requestsTable tbody');
+        const applyFiltersBtn = document.getElementById('applyFilters');
+        const exportExcelBtn = document.getElementById('exportExcel');
+        const requestModal = document.getElementById('requestModal');
+        const statsModal = document.getElementById('statsModal');
+        const receiptModal = document.getElementById('receiptModal');
+        const closeModalBtns = document.querySelectorAll('.close-modal');
+        const saveRequestBtn = document.getElementById('saveRequest');
+        const graduationYearFilter = document.getElementById('filterGraduationYear');
+        const statCards = document.querySelectorAll('.stat-card');
+
+        // تحميل إعدادات أيام التسليم (مباشرة)
+        db.ref('settings/deliveryDays').on('value', (snapshot) => {
+            deliveryDays = snapshot.exists() ? snapshot.val() : 15;
+        });
+
+        // تهيئة سنة التخرج في الفلتر
+        function initGraduationYearFilter() {
+            const currentYear = new Date().getFullYear();
+            for (let year = currentYear; year >= 2010; year--) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                graduationYearFilter.appendChild(option);
+            }
+        }
+        
+        // جلب جميع الطلبات من Firebase
+        function fetchRequests() {
+            db.ref('requests').on('value', (snapshot) => {
+                allRequests = [];
+                snapshot.forEach((childSnapshot) => {
+                    allRequests.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                });
+                allRequests.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                applyFilters();
+                updateStats();
+            });
+        }
+        
+        // تطبيق الفلاتر على الطلبات
+        function applyFilters() {
+            const dateFilter = document.getElementById('filterDate').value;
+            const statusFilter = document.getElementById('filterStatus').value;
+            const yearFilter = document.getElementById('filterGraduationYear').value;
+            const searchQueryRaw = document.getElementById('search').value.trim();
+            const searchQuery = searchQueryRaw.toLowerCase();
+            
+            const filtered = allRequests.filter(req => {
+                const reqDate = req.timestamp ? new Date(req.timestamp).toISOString().split('T')[0] : '';
+                const dateMatch = !dateFilter || reqDate === dateFilter;
+                const statusMatch = statusFilter === 'all' || req.status === statusFilter;
+                const yearMatch = yearFilter === 'all' || req.graduationYear == yearFilter;
+                
+                const nameMatch = req.name && req.name.toLowerCase().startsWith(searchQuery);
+                const nidMatch = req.nationalId && String(req.nationalId).startsWith(searchQueryRaw);
+                const searchMatch = !searchQueryRaw || nameMatch || nidMatch;
+                
+                return dateMatch && statusMatch && yearMatch && searchMatch;
+            });
+            renderRequests(filtered);
+        }
+        
+        // عرض الطلبات في الجدول
+        function renderRequests(requests) {
+            requestsTableBody.innerHTML = '';
+            if (requests.length === 0) {
+                requestsTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">لا توجد طلبات تطابق الفلتر</td></tr>';
+                return;
+            }
+            
+            requests.forEach(req => {
+                const tr = document.createElement('tr');
+                const servicesStr = (req.services || []).map(s => `${s.name || s.id} (x${s.quantity || s.qty || 1})`).join('، ');
+                const dateStr = req.timestamp ? new Date(req.timestamp).toLocaleDateString('ar-EG') : 'N/A';
+                
+                // حساب تاريخ التسليم باستخدام deliveryDays المحمل من الإعدادات
+                const deliveryDate = req.timestamp ? new Date(req.timestamp) : new Date();
+                deliveryDate.setDate(deliveryDate.getDate() + (req.customDeliveryDays || deliveryDays || 15));
+                const deliveryDateStr = deliveryDate.toLocaleDateString('ar-EG');
+                
+                let statusBadge;
+                switch(req.status) {
+                    case 'pending': statusBadge = '<span class="badge badge-warning">قيد التنفيذ</span>'; break;
+                    case 'cancelled': statusBadge = '<span class="badge badge-danger">ملغى</span>'; break;
+                    default: statusBadge = `<span class="badge">${req.status}</span>`; break;
+                }
+                
+                tr.innerHTML = `
+                    <td>${req.id ? req.id.substring(1, 8) : 'N/A'}</td>
+                    <td>${req.name || 'غير متوفر'}</td>
+                    <td>${req.graduationYear || 'N/A'}</td>
+                    <td>${servicesStr}</td>
+                    <td>${dateStr}</td>
+                    <td>${deliveryDateStr}</td>
+                    <td>${statusBadge}</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-primary view-btn" data-id="${req.id}"><i class="fas fa-eye"></i></button>
+                        <button class="btn btn-success complete-btn" data-id="${req.id}"><i class="fas fa-check"></i> تم</button>
+                        <button class="btn btn-danger delete-btn" data-id="${req.id}"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                requestsTableBody.appendChild(tr);
+            });
+
+            // ربط الأحداث مع الأزرار
+            document.querySelectorAll('.view-btn').forEach(btn => btn.addEventListener('click', (ev) => viewRequest(ev.currentTarget.dataset.id)));
+            document.querySelectorAll('.complete-btn').forEach(btn => btn.addEventListener('click', (ev) => completeRequest(ev.currentTarget.dataset.id)));
+            document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', (ev) => deleteRequest(ev.currentTarget.dataset.id)));
+        }
+
+        // تحديث الإحصائيات
+        function updateStats() {
+            const total = allRequests.length;
+            const pending = allRequests.filter(r => r.status === 'pending').length;
+            const cancelled = allRequests.filter(r => r.status === 'cancelled').length;
+            
+            document.getElementById('totalRequests').textContent = total;
+            document.getElementById('pendingRequests').textContent = pending;
+            document.getElementById('cancelledRequests').textContent = cancelled;
+        }
+
+        // عرض تفاصيل الطلب
+        function viewRequest(id) {
+            const req = allRequests.find(r => r.id === id);
+            if (!req) return;
+            
+            document.getElementById('modalRequestId').textContent = req.id || 'غير متوفر';
+            document.getElementById('modalName').textContent = req.name || 'غير متوفر';
+            document.getElementById('modalNationalId').textContent = req.nationalId || 'غير متوفر';
+            document.getElementById('modalGraduationYear').textContent = req.graduationYear || 'غير متوفر';
+            document.getElementById('modalPhone').textContent = req.phone || 'غير متوفر';
+            document.getElementById('modalWhatsapp').textContent = req.whatsapp || 'غير متوفر';
+            document.getElementById('modalEmail').textContent = req.email || 'غير متوفر';
+            
+            // عرض الخدمات المطلوبة
+            const servicesList = document.getElementById('modalServices');
+            servicesList.innerHTML = '';
+            if (req.services && req.services.length > 0) {
+                req.services.forEach(service => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${service.name || service.id} (x${service.quantity || service.qty || 1})</span><span>${service.price ? service.price + ' ج.م' : ''}</span>`;
+                    servicesList.appendChild(li);
+                });
+            } else {
+                servicesList.innerHTML = '<li>لا توجد خدمات</li>';
+            }
+            
+            // عرض إيصالات الدفع كصور مصغرة + رابط تحميل
+            const receiptsContainer = document.getElementById('modalReceipts');
+            receiptsContainer.innerHTML = '';
+            if (req.services && req.services.length > 0) {
+                // بعض الخدمات تحتوي على receiptUrl
+                req.services.forEach((service, index) => {
+                    if (service.receiptUrl) {
+                        const img = document.createElement('img');
+                        img.src = service.receiptUrl;
+                        img.alt = `إيصال الدفع ${index + 1}`;
+                        img.className = 'receipt-thumbnail';
+                        img.onclick = () => showFullReceipt(service.receiptUrl);
+                        receiptsContainer.appendChild(img);
+                    }
+                });
+            }
+            if (!receiptsContainer.hasChildNodes()) receiptsContainer.innerHTML = '<p>لا توجد إيصالات</p>';
+            
+            // حساب وعرض تاريخ التسليم
+            if (req.timestamp) {
+                const deliveryDate = new Date(req.timestamp);
+                const daysToAdd = req.customDeliveryDays || deliveryDays || 15;
+                deliveryDate.setDate(deliveryDate.getDate() + daysToAdd);
+                document.getElementById('modalDeliveryDate').textContent = deliveryDate.toLocaleDateString('ar-EG') + ' (' + new Date(deliveryDate).toLocaleDateString('ar-EG', { weekday: 'long' }) + ')';
+            } else {
+                document.getElementById('modalDeliveryDate').textContent = 'غير محدد';
+            }
+            
+            document.getElementById('modalStatus').value = req.status || 'pending';
+            document.getElementById('modalNotes').value = req.notes || '';
+            requestModal.style.display = 'flex';
+            requestModal.dataset.requestId = id;
+        }
+
+        // عرض صورة الإيصال بحجم كامل مع زر تحميل
+        function showFullReceipt(receiptUrl) {
+            document.getElementById('fullReceiptImage').src = receiptUrl;
+            const dl = document.getElementById('downloadReceiptBtn');
+            dl.href = receiptUrl;
+            // محاولة اقتراح اسم ملف للتحميل
+            try {
+                const urlParts = receiptUrl.split('/');
+                dl.download = urlParts[urlParts.length-1].split('?')[0];
+            } catch(e) { dl.removeAttribute('download'); }
+            receiptModal.style.display = 'flex';
+        }
+
+        // نقل الطلب إلى الطلبات المكتملة
+        async function completeRequest(id) {
+            if (!confirm("هل أنت متأكد من أن هذا الطلب قد تم تنفيذه؟ سيتم نقله إلى قائمة الطلبات المكتملة.")) return;
+
+            const requestRef = db.ref(`requests/${id}`);
+            const snapshot = await requestRef.once('value');
+            const requestData = snapshot.val();
+
+            if (requestData) {
+                requestData.status = 'completed';
+                const completedRequestRef = db.ref(`completed_requests/${id}`);
+                await completedRequestRef.set(requestData);
+                await requestRef.remove();
+                alert("تم نقل الطلب بنجاح.");
+            } else {
+                alert("خطأ: لم يتم العثور على الطلب.");
+            }
+        }
+
+        // حذف الطلب نهائياً
+        async function deleteRequest(id) {
+            if (!confirm("تحذير! هل أنت متأكد من حذف هذا الطلب بشكل نهائي؟ لا يمكن التراجع عن هذا الإجراء.")) return;
+            
+            try {
+                await db.ref(`requests/${id}`).remove();
+                alert("تم حذف الطلب بنجاح.");
+            } catch (error) {
+                console.error("خطأ أثناء الحذف:", error);
+                alert("حدث خطأ أثناء حذف الطلب.");
+            }
+        }
+        
+        // تصدير البيانات إلى Excel
+        function exportToExcel() {
+            const filteredRequests = getFilteredRequestsForExport();
+            
+            const data = filteredRequests.map(req => {
+                const servicesStr = (req.services || []).map(s => `${s.name || s.id} (x${s.quantity || s.qty || 1})`).join('، ');
+                const dateStr = req.timestamp ? new Date(req.timestamp).toLocaleDateString('ar-EG') : '';
+                const deliveryDate = req.timestamp ? new Date(req.timestamp) : new Date();
+                deliveryDate.setDate(deliveryDate.getDate() + (req.customDeliveryDays || deliveryDays || 15));
+                const deliveryDateStr = deliveryDate.toLocaleDateString('ar-EG');
+                
+                let statusStr;
+                switch(req.status) {
+                    case 'pending': statusStr = 'قيد التنفيذ'; break;
+                    case 'cancelled': statusStr = 'ملغى'; break;
+                    default: statusStr = req.status || 'غير معروف';
+                }
+                
+                return {
+                    'رقم الطلب': req.id ? req.id.substring(1, 8) : 'N/A',
+                    'اسم الخريج': req.name || 'غير متوفر',
+                    'سنة التخرج': req.graduationYear || 'N/A',
+                    'الخدمات': servicesStr,
+                    'تاريخ الطلب': dateStr,
+                    'تاريخ التسليم': deliveryDateStr,
+                    'الحالة': statusStr,
+                    'الرقم القومي': req.nationalId || '',
+                    'رقم الهاتف': req.phone || '',
+                    'الواتساب': req.whatsapp || '',
+                    'البريد الإلكتروني': req.email || '',
+                    'ملاحظات': req.notes || ''
+                };
+            });
+            
+            const worksheet = XLSX.utils.json_to_sheet(data);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "طلبات الخريجين");
+            XLSX.writeFile(workbook, "طلبات_الخريجين.xlsx");
+        }
+        
+        // الحصول على الطلبات المفلترة للتصدير
+        function getFilteredRequestsForExport() {
+            const dateFilter = document.getElementById('filterDate').value;
+            const statusFilter = document.getElementById('filterStatus').value;
+            const yearFilter = document.getElementById('filterGraduationYear').value;
+            const searchQueryRaw = document.getElementById('search').value.trim();
+            const searchQuery = searchQueryRaw.toLowerCase();
+            
+            return allRequests.filter(req => {
+                const reqDate = req.timestamp ? new Date(req.timestamp).toISOString().split('T')[0] : '';
+                const dateMatch = !dateFilter || reqDate === dateFilter;
+                const statusMatch = statusFilter === 'all' || req.status === statusFilter;
+                const yearMatch = yearFilter === 'all' || req.graduationYear == yearFilter;
+                const nameMatch = req.name && req.name.toLowerCase().startsWith(searchQuery);
+                const nidMatch = req.nationalId && String(req.nationalId).startsWith(searchQueryRaw);
+                const searchMatch = !searchQueryRaw || nameMatch || nidMatch;
+                
+                return dateMatch && statusMatch && yearMatch && searchMatch;
+            });
+        }
+        
+        // ربط أحداث الواجهه
+        closeModalBtns.forEach(btn => btn.addEventListener('click', function() {
+            this.closest('.modal').style.display = 'none';
+        }));
+        
+        window.addEventListener('click', (event) => {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        });
+        
+        saveRequestBtn.addEventListener('click', async () => {
+            const requestId = requestModal.dataset.requestId;
+            const newStatus = document.getElementById('modalStatus').value;
+            const newNotes = document.getElementById('modalNotes').value;
+            if (!requestId) return;
+            try {
+                await db.ref(`requests/${requestId}`).update({ status: newStatus, notes: newNotes });
+                alert('تم حفظ التغييرات بنجاح!');
+                requestModal.style.display = 'none';
+            } catch (error) {
+                console.error('خطأ في حفظ التغييرات:', error);
+                alert('حدث خطأ أثناء حفظ التغييرات.');
+            }
+        });
+        
+        applyFiltersBtn.addEventListener('click', applyFilters);
+        exportExcelBtn.addEventListener('click', exportToExcel);
+
+        // تحويل البحث ليعمل فور كتابة أول حرف (live search)
+        document.getElementById('search').addEventListener('input', applyFilters);
+        document.getElementById('search').addEventListener('keyup', applyFilters);
+        document.getElementById('filterDate').addEventListener('change', applyFilters);
+        document.getElementById('filterStatus').addEventListener('change', applyFilters);
+        document.getElementById('filterGraduationYear').addEventListener('change', applyFilters);
+
+        // تهيئة الصفحة
+        initGraduationYearFilter();
+        fetchRequests();
+    </script>
+</body>
+</html>

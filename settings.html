@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الإعدادات - طلبات الخريجين</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --info-color: #3498db;
+        }
+        body { font-family: 'Tajawal', sans-serif; margin: 0; padding: 0; background-color: #f5f7fa; }
+        .header { background-color: var(--primary-color); color: white; padding: 15px 0; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .nav { background-color: #2c3e50; padding: 10px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .nav a { color: white; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s; }
+        .nav a:hover, .nav a.active { background-color: var(--secondary-color); }
+        .container { max-width: 900px; margin: 20px auto; padding: 0 15px; }
+        .card { background-color: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .card-title { color: var(--primary-color); margin-top: 0; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; }
+        .form-group input[type="text"], .form-group input[type="number"], .form-group input[type="date"], .form-group input[type="time"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background-color: var(--secondary-color); color: white; }
+        .btn-success { background-color: var(--success-color); color: white; }
+        .btn-danger { background-color: #e74c3c; color: white; }
+        .service-item { display: flex; flex-wrap: wrap; align-items: center; gap: 15px; padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 10px; }
+        .service-item .form-group { flex: 1; min-width: 150px; margin-bottom: 0; }
+        .service-item .btn { align-self: flex-end; }
+        .add-service-form { display: flex; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; }
+        .add-service-form input { flex-grow: 1; padding: 10px; border-radius: 6px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <div class="header"><h1>الإعدادات</h1></div>
+    
+    <div class="nav">
+        <a href="admin.html"><i class="fas fa-list"></i> الطلبات الحالية</a>
+        <a href="completed.html"><i class="fas fa-check-circle"></i> الطلبات المكتملة</a>
+        <a href="settings.html" class="active"><i class="fas fa-cog"></i> الإعدادات</a>
+    </div>
+    
+    <div class="container">
+        <!-- قسم جديد لإعدادات موعد التسليم -->
+        <div class="card">
+            <h2 class="card-title">إعدادات موعد التسليم</h2>
+            <p>يمكنك اختيار حفظ مواعد ثابتة أو استخدام طريقة عدد الأيام لحساب تاريخ التسليم تلقائياً.</p>
+
+            <div class="form-group">
+                <label for="deliveryDays">عدد أيام الاستلام (يستخدم لحساب تاريخ الاستلام تلقائياً)</label>
+                <input type="number" id="deliveryDays" min="1" placeholder="مثال: 15">
+            </div>
+            <button id="saveDeliveryDaysBtn" class="btn btn-primary"><i class="fas fa-save"></i> حفظ عدد الأيام</button>
+
+            <hr style="margin:18px 0">
+
+            <div class="form-group">
+                <label for="pickupDate">تاريخ تسليم ثابت (اختياري)</label>
+                <input type="date" id="pickupDate">
+            </div>
+            <div class="form-group">
+                <label for="pickupTime">وقت بدء التسليم (اختياري)</label>
+                <input type="time" id="pickupTime">
+            </div>
+            <button id="savePickupDetailsBtn" class="btn btn-primary"><i class="fas fa-save"></i> حفظ موعد ثابت</button>
+            <p class="small" style="margin-top:10px;color:#666">إذا تم إدخال تاريخ ووقت ثابتين ستعرض صفحة التقديم هذا الموعد للطلاب. وإلا ستُحسب مدة التسليم من عدد الأيام.</p>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">إدارة الخدمات</h2>
+            <div id="servicesList"></div>
+            <div class="add-service-form">
+                <input type="text" id="newServiceName" placeholder="اسم الخدمة الجديدة">
+                <button id="addServiceBtn" class="btn btn-success"><i class="fas fa-plus"></i> إضافة خدمة</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtLojF4wpmpDua3UZa_GzlaXhTxM2ediI",
+            authDomain: "gradu-ae76f.firebaseapp.com",
+            databaseURL: "https://gradu-ae76f-default-rtdb.firebaseio.com",
+            projectId: "gradu-ae76f"
+        };
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        
+        // عناصر الإعدادات
+        const savePickupBtn = document.getElementById('savePickupDetailsBtn');
+        const pickupDateInput = document.getElementById('pickupDate');
+        const pickupTimeInput = document.getElementById('pickupTime');
+
+        const deliveryDaysInput = document.getElementById('deliveryDays');
+        const saveDeliveryDaysBtn = document.getElementById('saveDeliveryDaysBtn');
+
+        // تحميل القيم الحالية عند فتح الصفحة
+        db.ref('settings/pickupDetails').on('value', (snapshot) => {
+            if (snapshot.exists()) {
+                const details = snapshot.val();
+                pickupDateInput.value = details.date || '';
+                pickupTimeInput.value = details.time || '';
+            } else {
+                pickupDateInput.value = '';
+                pickupTimeInput.value = '';
+            }
+        });
+
+        db.ref('settings/deliveryDays').on('value', (snapshot) => {
+            deliveryDaysInput.value = snapshot.exists() ? snapshot.val() : '';
+        });
+
+        // حفظ الموعد الثابت
+        savePickupBtn.addEventListener('click', () => {
+            const date = pickupDateInput.value;
+            const time = pickupTimeInput.value;
+            if (date && time) {
+                db.ref('settings/pickupDetails').set({ date: date, time: time })
+                    .then(() => alert('تم حفظ موعد التسليم الثابت بنجاح.'))
+                    .catch(err => alert('حدث خطأ: ' + err.message));
+            } else {
+                alert('الرجاء إدخال التاريخ والوقت معاً (أو امسح الحقول لإلغاء الموعد الثابت).');
+            }
+        });
+
+        // حفظ عدد أيام الاستلام
+        saveDeliveryDaysBtn.addEventListener('click', () => {
+            const days = parseInt(deliveryDaysInput.value);
+            if (!isNaN(days) && days > 0) {
+                db.ref('settings/deliveryDays').set(days)
+                    .then(() => alert('تم حفظ عدد الأيام بنجاح.'))
+                    .catch(err => alert('حدث خطأ: ' + err.message));
+            } else {
+                alert('الرجاء إدخال رقم صحيح أكبر من 0.');
+            }
+        });
+
+        // إدارة الخدمات
+        const servicesListEl = document.getElementById("servicesList");
+        function renderServices(services) {
+            servicesListEl.innerHTML = "";
+            services.forEach(service => {
+                const itemEl = document.createElement("div");
+                itemEl.className = "service-item";
+                itemEl.innerHTML = `
+                    <div class="form-group">
+                        <label>اسم الخدمة:</label>
+                        <input type="text" value="${(service.name||'')}" class="service-name-input" data-id="${service.id}">
+                    </div>
+                    <div class="form-group">
+                        <label>العدد الافتراضي:</label>
+                        <input type="number" value="${service.quantity || 1}" class="service-quantity-input" data-id="${service.id}">
+                    </div>
+                    <div class="form-group">
+                        <label>مفعل:</label>
+                        <input type="checkbox" ${service.active ? 'checked' : ''} class="service-active-input" data-id="${service.id}">
+                    </div>
+                    <div style="min-width:110px;display:flex;flex-direction:column;gap:6px">
+                        <button class="btn btn-primary save-service-btn" data-id="${service.id}"><i class="fas fa-save"></i> تطبيق</button>
+                        <button class="btn btn-danger delete-service-btn" data-id="${service.id}"><i class="fas fa-trash"></i> حذف</button>
+                    </div>
+                `;
+                servicesListEl.appendChild(itemEl);
+            });
+
+            // إضافة أحداث للأزرار
+            document.querySelectorAll(".save-service-btn").forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    const parent = e.currentTarget.closest('.service-item');
+                    const name = parent.querySelector('.service-name-input').value.trim();
+                    const qty = parseInt(parent.querySelector('.service-quantity-input').value) || 1;
+                    const active = parent.querySelector('.service-active-input').checked;
+                    db.ref(`services/${id}`).update({ name, quantity: qty, active })
+                        .then(() => alert('تم تحديث الخدمة'))
+                        .catch(err => alert('خطأ: ' + err.message));
+                });
+            });
+
+            document.querySelectorAll(".delete-service-btn").forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    if (!confirm('هل أنت متأكد من حذف هذه الخدمة؟')) return;
+                    db.ref(`services/${id}`).remove();
+                });
+            });
+        }
+
+        db.ref("services").on("value", snapshot => {
+            const services = [];
+            if (snapshot.exists()) {
+                snapshot.forEach(child => services.push({ id: child.key, ...child.val() }));
+            }
+            renderServices(services);
+        });
+
+        document.getElementById("addServiceBtn").addEventListener("click", () => {
+            const newServiceName = document.getElementById("newServiceName").value.trim();
+            if (!newServiceName) { alert("الرجاء إدخال اسم الخدمة."); return; }
+            db.ref("services").push({ name: newServiceName, quantity: 1, active: true })
+                .then(() => { document.getElementById("newServiceName").value = ''; })
+                .catch(err => alert('حدث خطأ: ' + err.message));
+        });
+    </script>
+</body>
+</html>
